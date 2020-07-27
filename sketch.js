@@ -1,27 +1,54 @@
+// NOISY RINGS (https://github.com/kgolid/p5ycho/tree/master/trunk)
+let sketch = function (p) {
 
-// EMOJIS MOVIN'
-let cols = 40, rows = 40, s = 400, step = (s / cols), factor = 0.03;
-let strings = ['🍊', '🍒', '🌽','🍕','🍤']
+  let rings = 140;
+  let dim_init = 0;
+  let dim_delta = 4;
 
-function setup() {
-  createCanvas(s, s - step);
-  textSize(step);
-  fill(255);
-  
-}
+  let chaos_init = .2;
+  let chaos_delta = 0.12;
+  let chaos_mag = 20;
 
-function draw() {
-  background(50);
-  
-  for(let y = 1; y < rows; y++) {
-  	for(let x = 0; x < cols; x++) {
-        n = noise(x * factor, y * factor, frameCount*0.01) *  2;
-        n = (n - int(n)) * 3;
-        cx = sin(n);
-        cy = cos(n);
-        i = floor(map(cx * cy, -0.5, 0.45, 0, strings.length-1));
-    	  text(strings[i], x * step + 3, y * step);
+  let ox = p.random(10000);
+  let oy = p.random(10000);
+  let oz = p.random(10000);
+
+  p.setup = function () {
+    p.createCanvas(800, 800);
+    p.strokeWeight(3);
+    p.stroke(255, 204, 0);
+    p.smooth();
+    p.noFill();
+    //p.noLoop();
+
+  }
+
+  p.draw = function () {
+    p.clear();
+    p.translate(p.width / 2, p.height / 2);
+    display();
+  }
+
+  function display() {
+    //ox+=0.04;
+    //oy-=0.02;
+    oz += 0.01;
+    for (let i = 0; i < rings; i++) {
+      p.beginShape();
+      for (let angle = 0; angle < 360; angle++) {
+        let radian = p.radians(angle);
+        let radius = (chaos_mag * getNoiseWithTime(radian, chaos_delta * i + chaos_init, oz)) + (dim_delta * i + dim_init);
+        p.vertex(radius * p.cos(radian), radius * p.sin(radian));
+      }
+      p.endShape(p.CLOSE);
     }
   }
-  // noLoop()
+
+  function getNoiseWithTime(radian, dim, time) {
+    let r = radian % p.TWO_PI;
+    if (r < 0.0) { r += p.TWO_PI; }
+    return p.noise(ox + p.cos(r) * dim, oy + p.sin(r) * dim, oz + time);
+  }
 }
+
+new p5(sketch);
