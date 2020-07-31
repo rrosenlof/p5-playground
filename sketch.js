@@ -1,54 +1,139 @@
-// NOISY RINGS (https://github.com/kgolid/p5ycho/tree/master/trunk)
-let sketch = function (p) {
+let sketch = function(p) {
+  let THE_SEED;
+  let number_of_sources = 200;
+  let padding = 50;
 
-  let rings = 140;
-  let dim_init = 0;
-  let dim_delta = 4;
+  let kill_range = 15;
+  let growth = 5;
 
-  let chaos_init = .2;
-  let chaos_delta = 0.12;
-  let chaos_mag = 20;
+  let cluster_spread = 100;
+  let cluster_size = 2000;
 
-  let ox = p.random(10000);
-  let oy = p.random(10000);
-  let oz = p.random(10000);
+  let nodes;
+  let sources;
 
-  p.setup = function () {
-    p.createCanvas(800, 800);
-    p.strokeWeight(3);
-    p.stroke(255, 204, 0);
-    p.smooth();
-    p.noFill();
-    //p.noLoop();
+  p.setup = function() {
+    p.createCanvas(1000, 1000);
+    THE_SEED = p.floor(p.random(9999999));
+    p.randomSeed(THE_SEED);
+    p.fill(255);
+    //p.frameRate(2);
+    p.stroke(50,0,150);
+    p.strokeWeight(5);
 
-  }
+    generate_sources();
+    generate_root_node_on_circumference();
+  };
 
-  p.draw = function () {
+  p.draw = function() {
     p.clear();
-    p.translate(p.width / 2, p.height / 2);
+    update();
     display();
-  }
+  };
 
   function display() {
-    //ox+=0.04;
-    //oy-=0.02;
-    oz += 0.01;
-    for (let i = 0; i < rings; i++) {
-      p.beginShape();
-      for (let angle = 0; angle < 360; angle++) {
-        let radian = p.radians(angle);
-        let radius = (chaos_mag * getNoiseWithTime(radian, chaos_delta * i + chaos_init, oz)) + (dim_delta * i + dim_init);
-        p.vertex(radius * p.cos(radian), radius * p.sin(radian));
+    //sources.forEach(src => src.display());
+    nodes.forEach(node => node.display());
+  }
+
+  function update() {
+    for (let i = 0; i < sources.length; i++) {
+      if (sources[i].alive) {
+        let closest_node = find_closest_node(sources[i]);
+        if (closest_node.pos.dist(sources[i].pos) < kill_range) sources[i].kill();
+        closest_node.neighbors.push(sources[i]);
       }
-      p.endShape(p.CLOSE);
+    }
+
+    let new_nodes = [];
+    for (let n in nodes) {
+      let node = nodes[n];
+      if (node.neighbors.length > 0) {
+        let dir = node.get_mean_dir();
+        new_nodes.push(new Node(node.pos.x + dir.x * growth, node.pos.y + dir.y * growth, node.pos));
+        node.neighbors = [];
+      }
+    }
+    nodes = nodes.concat(new_nodes);
+  }
+
+  function generate_sources() {
+    sources = [];
+    for (let i = 0; i < cluster_size; i++) {
+      //sources.push(new Source(p.random(padding, p.width - padding), p.random(padding, p.height - padding)));
+      sources.push(
+        new Source(p.randomGaussian(p.width / 2, cluster_spread), p.randomGaussian(p.height / 2, cluster_spread))
+      );
     }
   }
 
-  function getNoiseWithTime(radian, dim, time) {
-    let r = radian % p.TWO_PI;
-    if (r < 0.0) { r += p.TWO_PI; }
-    return p.noise(ox + p.cos(r) * dim, oy + p.sin(r) * dim, oz + time);
+  function generate_root_node() {
+    nodes = [];
+    for (let i = 0; i < 5; i++) {
+      let xpos = p.random(0, p.width);
+      let ypos = p.random(0, p.height);
+      nodes.push(new Node(xpos, ypos, xpos, ypos));
+    }
   }
-}
 
+  function generate_root_node_on_circumference() {
+    nodes = [];
+    for (let i = 0; i < 3; i++) {
+      let angle = p.random(p.TAU);
+      nodes.push(
+        new Node(
+          p.width / 2 + p.cos(angle) * 300,
+          p.height / 2 + p.sin(angle) * 300,
+          p.width / 2 + p.cos(angle) * 300,
+          p.height / 2 + p.sin(angle) * 300
+        )
+      );
+    }
+  }
+
+  function find_closest_node(source) {
+    return nodes.reduce((acc, curr) => (acc.pos.dist(source.pos) < curr.pos.dist(source.pos) ? acc : curr));
+  }
+
+  class Source {
+    constructor(x, y) {
+      this.pos = p.createVector(x, y);
+      this.alive = true;
+    }
+
+    kill() {
+      this.alive = false;
+    }
+
+    display() {
+      p.noStroke();
+      p.fill(255, 0, 0);
+      if (this.alive) {
+        p.ellipse(this.pos.x, this.pos.y, 4, 4);
+      }
+    }
+  }
+
+  class Node {
+    constructor(x, y, parent) {
+      this.pos = p.createVector(x + p.randomGaussian(0, 1.5), y + p.randomGaussian(0, 1.5));
+      this.parent_pos = parent;
+      this.neighbors = [];
+    }
+
+    get_mean_dir() {
+      let normalized = this.neighbors.map(n => p5.Vector.sub(n.pos, this.pos).normalize());
+      return normalized.reduce((acc, curr) => p5.Vector.add(acc, curr)).normalize();
+    }
+
+    display() {
+      p.stroke(50);
+      p.line(this.parent_pos.x, this.parent_pos.y, this.pos.x, this.pos.y);
+    }
+  }
+
+  p.keyPressed = function() {
+    if (p.keyCode === 80) p.saveCanvas('sketch_' + THE_SEED, 'jpeg');
+  };
+};
 new p5(sketch);
