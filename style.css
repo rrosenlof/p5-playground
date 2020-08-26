@@ -1,0 +1,8 @@
+body {
+    width: 900px;
+    margin: auto;
+    padding: 0;
+}
+canvas {
+    display: block;
+}
