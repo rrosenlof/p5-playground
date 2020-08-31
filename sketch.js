@@ -71,6 +71,10 @@ let numbers = [
     squares: [
       [2, 2], [2, 4]
     ]
+  },
+  {
+    number: "-",
+    squares: []
   }
 ]
 let grid;
@@ -80,7 +84,7 @@ let resolution = 25;
 let index = 0;
 
 function setup() {
-  createCanvas(825, 175);
+  createCanvas(950, 175);
   frameRate(4)
   cols = width / resolution;
   rows = height / resolution;
@@ -123,7 +127,7 @@ function drawTime() {
   m < 10 ? m = m.toString().padStart(2, '0') : null;
   let s = d.getSeconds();
   s < 10 ? s = s.toString().padStart(2, '0') : null;
-  let n = h.toString().concat(":", m, ":", s);
+  let n = h.toString().concat(":", m, ":", s, "-");
   n = n.toString().split("");
 
   // loops through each digit and 
