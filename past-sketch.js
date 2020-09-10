@@ -306,7 +306,7 @@ var start = 0;
 var inc = 0.01;
 
 function setup() {
-  createCanvas(200, 200);
+  createCanvas(500, 500);
   pixelDensity(1);
 }
 
@@ -315,28 +315,18 @@ function draw() {
   var yoff = 0;
 
   loadPixels();
-  // for (var y = 0; y < height; y++) {
-  //   for (var x = 0; x < width; x++) {
-  //     var index = (x + y * width) * 4;
-  //     pixels[index + 0] = y;
-  //     pixels[index + 1] = x;
-  //     pixels[index + 2] = 240;
-  //     pixels[index + 3] = random(230,240);
-  //   }
-  // }
   for (var y =0; y < height; y++) {
     var xoff = 0;
     for (var x =0; x < width; x++) {
       var index = (x + y * width) * 4;
       var r = noise(xoff, yoff) * 8 * floor(random(-1,2));
-      // console.log(r);
       pixels[index] = 20 + r;
       r = noise(xoff, yoff) * 8 * floor(random(-1,2));
-      pixels[index+1] = 100 + r;
+      pixels[index+1] = 0 + r;
       r = noise(xoff, yoff) * 8 * floor(random(-1,2));
       pixels[index+2] = 150 + r;
       r = noise(xoff, yoff) * 8 * floor(random(-1,2));
-      pixels[index+3] = 200;
+      pixels[index+3] = 200 + r;
 
       xoff += inc;
 
@@ -344,7 +334,7 @@ function draw() {
     yoff += inc;
   }
   updatePixels();
-  noLoop();
+  // noLoop();
 }
 
 // PIXELATE
