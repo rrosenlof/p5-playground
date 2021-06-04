@@ -5,7 +5,7 @@ let widthPerc;
 let density = 10
 
 function preload() {
-  img = loadImage('pics/test (20).jpg');
+  img = loadImage('assets/test.jpg');
 }
 
 function setup() {
