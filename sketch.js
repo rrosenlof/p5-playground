@@ -4,13 +4,13 @@ let arrSum;
 let widthPerc;
 let density = 10; //less than density 2 usually
 let density2 = 12;
-let xInc = 15;
-let yInc = 6;
-let threshold = 1200; //higher = darker
-let pixelLength = 3;
-let pixelWidth = 3;
-let rectXOffset = 3;
-let rectYOffset = 3;
+let xInc = 8;
+let yInc = 8;
+let threshold = 1020; //higher = darker
+let pixelLength = 4;
+let pixelWidth = 4;
+let rectXOffset = 2;
+let rectYOffset = 2;
 
 
 function preload() {
@@ -22,11 +22,11 @@ function setup() {
   
   imageMode(CENTER);
   noStroke();
-  background("#F2E8CE");
+  background("#2020bb");
 
   img.loadPixels();
   let filterArr = [THRESHOLD, GRAY, OPAQUE, INVERT, DILATE, ERODE];
-  img.filter(filterArr[1]);
+  img.filter(filterArr[3]);
 }
 
 function draw() {
@@ -36,7 +36,7 @@ function draw() {
       arrSum = pix.reduce(getSum, 0);
       widthPerc = density - Math.ceil((arrSum / threshold) * density2);
       for (let i = 0; i < widthPerc; i += 1) {
-        colorSquare = ('#0D2E75');
+        colorSquare = ('#F2E8CE');
         fill(colorSquare);
         rect(x + (i * rectXOffset), y - (i * rectYOffset), pixelWidth, pixelLength);
       }
